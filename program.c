@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 void group_leader(__global uint8_t *match_configs)
 {
 	return;
