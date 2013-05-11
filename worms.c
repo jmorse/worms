@@ -24,6 +24,7 @@ cl_mem match_config_buf, output_buf;
 cl_device_id device_id;
 cl_kernel kernel;
 cl_command_queue cmd_queue;
+cl_event kernel_completion;
 
 void
 check_error(const char *msg, cl_uint error)
@@ -174,8 +175,20 @@ main(int argc, char **argv)
 	g_work_size = 760;
 	l_work_size = 760;
 	error = clEnqueueNDRangeKernel(cmd_queue, kernel, 1, NULL, &g_work_size,
-					&l_work_size, 0, NULL, NULL);
+					&l_work_size, 0, NULL,
+					&kernel_completion);
 	check_error("enquing kernel", error);
+
+	char output_data[1024];
+	error = clEnqueueReadBuffer(cmd_queue, output_buf, true, 0, 1024,
+					output_data, 1, &kernel_completion,
+					NULL);
+	unsigned int i;
+	for (i = 0; i < 256; i++) {
+		printf("%d,", output_data[i]);
+		if ((i % 8) == 7)
+			printf("\n");
+	}
 
 	exit(EXIT_SUCCESS);
 }
