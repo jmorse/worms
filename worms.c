@@ -82,16 +82,25 @@ void
 prepare_job_scenario()
 {
 	cl_int error;
+	cl_kernel kernel;
 	const char *progtextptr = "#include \"program.c\"";
 	cl_program prog = clCreateProgramWithSource(opencl_ctx, 1, &progtextptr,
 							NULL, &error);
 	check_error("creating program", error);
+
+	error = clBuildProgram(prog, 1, &device_id, "", NULL, NULL);
+	check_error("building program", error);
+
+	kernel = clCreateKernel(prog, "start_trampoline", &error);
+	check_error("creating kernel", error);
 
 	match_config_buf = clCreateBuffer(opencl_ctx,
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 				sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS,
 				match_configs, &error);
 	check_error("creating buffer", error);
+
+	clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
 }
 
 int
