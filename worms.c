@@ -3,7 +3,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <CL/opencl.h>
 #include <CL/cl_ext.h>
@@ -83,8 +87,31 @@ load_round_configs(const char *filename)
 void
 prepare_job_scenario()
 {
+	struct stat s;
 	cl_int error;
-	const char *progtextptr = "#include \"program.c\"";
+
+	if (stat("program.c", &s) < 0) {
+		perror("Couldn't stat program.c");
+		exit(EXIT_FAILURE);
+	}
+
+	if (s.st_size >= 100000) {
+		fprintf(stderr, "Unreasonably sized program.c to dump on the "
+				"stack (%ld bytes)\n", (long)s.st_size);
+		exit(EXIT_FAILURE);
+	}
+
+	char prog_buffer[s.st_size];
+	memset(prog_buffer, 0, s.st_size);
+	FILE *f = fopen("program.c", "r");
+	if (fread(prog_buffer, s.st_size, 1, f) != 1) {
+		perror("Couldn't read from program.c");
+		exit(EXIT_FAILURE);
+	}
+
+	fclose(f);
+
+	const char *progtextptr = prog_buffer;
 	cl_program prog = clCreateProgramWithSource(opencl_ctx, 1, &progtextptr,
 							NULL, &error);
 	check_error("creating program", error);
