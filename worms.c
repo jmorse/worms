@@ -27,7 +27,7 @@ check_error(const char *msg, cl_uint error)
   if (!error)
     return;
 
-  fprintf(stderr, "Error during %s: %d", msg, error);;;;
+  fprintf(stderr, "Error during %s: %d\n", msg, error);
   fflush(stderr);
   abort();
 }
