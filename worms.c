@@ -9,6 +9,17 @@
 cl_context opencl_ctx;
 
 void
+check_error(const char *msg, cl_uint error)
+{
+  if (!error)
+    return;
+
+  fprintf(stderr, "Error during %s: %d", msg, error);;;;
+  fflush(stderr);
+  abort();
+}
+
+void
 init_opencl()
 {
 	cl_int error;
@@ -31,6 +42,7 @@ init_opencl()
 
 	opencl_ctx = clCreateContext(props, num_devices, dev_ids,
 					NULL, NULL, &error);
+	check_error("creating context", error);
 }
 
 int
