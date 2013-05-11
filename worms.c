@@ -16,6 +16,7 @@
 
 uint8_t *match_configs;
 cl_context opencl_ctx;
+cl_mem match_config_buf;
 
 void
 check_error(const char *msg, cl_uint error)
@@ -75,6 +76,17 @@ load_round_configs(const char *filename)
 	fprintf(stderr, "Read in %d match configs\n", j);
 }
 
+void
+prepare_job_scenario()
+{
+	cl_int error;
+
+	match_config_buf = clCreateBuffer(opencl_ctx,
+				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS,
+				match_configs, &error);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -86,5 +98,6 @@ main(int argc, char **argv)
 
 	init_opencl();
 	load_round_configs(argv[1]);
+	prepare_job_scenario();
 	exit(EXIT_SUCCESS);
 }
