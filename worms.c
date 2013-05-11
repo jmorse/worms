@@ -20,7 +20,7 @@
 
 uint8_t *match_configs;
 cl_context opencl_ctx;
-cl_mem match_config_buf;
+cl_mem match_config_buf, output_buf;
 cl_device_id device_id;
 cl_kernel kernel;
 cl_command_queue cmd_queue;
@@ -141,7 +141,13 @@ prepare_job_scenario()
 				match_configs, &error);
 	check_error("creating buffer", error);
 
+	output_buf = clCreateBuffer(opencl_ctx,
+				CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR,
+				1024, NULL, &error);
+	check_error("creating output buffer", error);
+
 	error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
+	error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buf);
 	check_error("setting kernel arg", error);
 
 	cmd_queue = clCreateCommandQueue(opencl_ctx, device_id, 0, &error);
