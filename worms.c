@@ -147,8 +147,9 @@ prepare_job_scenario()
 	check_error("creating output buffer", error);
 
 	error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
+	check_error("setting kernel arg 0", error);
 	error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buf);
-	check_error("setting kernel arg", error);
+	check_error("setting kernel arg 1", error);
 
 	cmd_queue = clCreateCommandQueue(opencl_ctx, device_id, 0, &error);
 	check_error("create cmd queue", error);
