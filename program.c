@@ -1,9 +1,9 @@
-void group_leader()
+void group_leader(__global uint8_t *match_configs)
 {
 	return;
 }
 
-void group_worker()
+void group_worker(__global uint8_t *match_configs)
 {
 	return;
 }
@@ -11,9 +11,9 @@ void group_worker()
 __kernel void start_trampoline(__global uint8_t *match_configs)
 {
 	if (get_local_id() == 0)
-		group_leader();
+		group_leader(match_configs);
 	else
-		group_worker();
+		group_worker(match_configs);
 
 	return;
 }
