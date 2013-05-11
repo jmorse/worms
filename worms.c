@@ -151,6 +151,8 @@ prepare_job_scenario()
 int
 main(int argc, char **argv)
 {
+	size_t g_work_size, l_work_size;
+	cl_int error;
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage: worms matchlist\n");
@@ -160,5 +162,13 @@ main(int argc, char **argv)
 	init_opencl();
 	load_round_configs(argv[1]);
 	prepare_job_scenario();
+
+	/* Start this processing scenario. */
+	g_work_size = 760;
+	l_work_size = 760;
+	error = clEnqueueNDRangeKernel(cmd_queue, kernel, 1, NULL, &g_work_size,
+					&l_work_size, 0, NULL, NULL);
+	check_error("enquing kernel", error);
+
 	exit(EXIT_SUCCESS);
 }
