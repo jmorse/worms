@@ -2,10 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <CL/opencl.h>
 #include <CL/cl_ext.h>
 
+#define NUMTEAMS 32
+#define NUMSLOTS 4
+#define NUMMATCHES 8
+#define NUMROUNDS 6
+#define NUMMATCHCONFIGS 35960
+
+uint8_t *match_configs;
 cl_context opencl_ctx;
 
 void
@@ -45,10 +53,28 @@ init_opencl()
 	check_error("creating context", error);
 }
 
-int
-main()
+void
+load_round_configs(const char *filename)
 {
 
+	match_configs = malloc(sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS);
+
+	/* And read everything in from input file. */
+	FILE *f = fopen(filename, "r");
+	f = f; /* Unimplemented right now */
+
+}
+
+int
+main(int argc, char **argv)
+{
+
+	if (argc != 2) {
+		fprintf(stderr, "Usage: worms matchlist\n");
+		exit(1);
+	}
+
 	init_opencl();
+	load_round_configs(argv[1]);
 	return 0;
 }
