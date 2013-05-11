@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #include <CL/opencl.h>
 #include <CL/cl_ext.h>
@@ -80,10 +81,10 @@ main(int argc, char **argv)
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage: worms matchlist\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	init_opencl();
 	load_round_configs(argv[1]);
-	return 0;
+	exit(EXIT_SUCCESS);
 }
