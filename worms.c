@@ -80,11 +80,16 @@ void
 prepare_job_scenario()
 {
 	cl_int error;
+	const char *progtextptr = "#include \"program.c\"";
+	cl_program prog = clCreateProgramWithSource(opencl_ctx, 1, &progtextptr,
+							NULL, &error);
+	check_error("creating program", error);
 
 	match_config_buf = clCreateBuffer(opencl_ctx,
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 				sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS,
 				match_configs, &error);
+	check_error("creating buffer", error);
 }
 
 int
