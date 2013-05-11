@@ -90,6 +90,19 @@ prepare_job_scenario()
 	check_error("creating program", error);
 
 	error = clBuildProgram(prog, 1, &device_id, "", NULL, NULL);
+
+	if (error != CL_SUCCESS) {
+		char buffer[10000];
+		error = clGetProgramBuildInfo(prog, device_id,
+						CL_PROGRAM_BUILD_LOG,
+						sizeof(buffer), buffer, NULL);
+		check_error("checking error on program build", error);
+		fprintf(stderr, "Error building OpenCL program, text is:\n%s",
+				buffer);
+		fflush(stderr);
+		exit(EXIT_FAILURE);
+	}
+
 	check_error("building program", error);
 
 	kernel = clCreateKernel(prog, "start_trampoline", &error);
