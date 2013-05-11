@@ -56,13 +56,22 @@ init_opencl()
 void
 load_round_configs(const char *filename)
 {
+	unsigned int matches[NUMTEAMS], i, j;
 
 	match_configs = malloc(sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS);
 
 	/* And read everything in from input file. */
 	FILE *f = fopen(filename, "r");
-	f = f; /* Unimplemented right now */
+	j = 0;
+	while (fscanf(f, "(%u, %u, %u, %u)\n", &matches[0], &matches[1],
+				&matches[2], &matches[3]) == 4) {
+		for (i = 0; i < NUMTEAMS; i++) {
+			match_configs[(j * NUMTEAMS) + i] = matches[i];
+		}
+		j++;
+	}
 
+	fprintf(stderr, "Read in %d match configs\n", j);
 }
 
 int
