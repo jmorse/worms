@@ -17,6 +17,7 @@
 uint8_t *match_configs;
 cl_context opencl_ctx;
 cl_mem match_config_buf;
+cl_device_id device_id;
 
 void
 check_error(const char *msg, cl_uint error)
@@ -53,6 +54,7 @@ init_opencl()
 	opencl_ctx = clCreateContext(props, num_devices, dev_ids,
 					NULL, NULL, &error);
 	check_error("creating context", error);
+	device_id = dev_ids[0];
 }
 
 void
