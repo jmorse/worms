@@ -10,6 +10,9 @@ void group_worker(__global char *match_configs)
 
 __kernel void start_trampoline(__global char *match_configs)
 {
+	__local char rts[760];
+	__local char cts[760];
+
 	if (get_local_id(0) == 0)
 		group_leader(match_configs);
 	else
