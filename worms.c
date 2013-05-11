@@ -18,6 +18,8 @@ uint8_t *match_configs;
 cl_context opencl_ctx;
 cl_mem match_config_buf;
 cl_device_id device_id;
+cl_kernel kernel;
+cl_command_queue cmd_queue;
 
 void
 check_error(const char *msg, cl_uint error)
@@ -82,7 +84,6 @@ void
 prepare_job_scenario()
 {
 	cl_int error;
-	cl_kernel kernel;
 	const char *progtextptr = "#include \"program.c\"";
 	cl_program prog = clCreateProgramWithSource(opencl_ctx, 1, &progtextptr,
 							NULL, &error);
@@ -100,7 +101,11 @@ prepare_job_scenario()
 				match_configs, &error);
 	check_error("creating buffer", error);
 
-	clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
+	error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
+	check_error("setting kernel arg", error);
+
+	cmd_queue = clCreateCommandQueue(opencl_ctx, device_id, 0, &error);
+	check_error("create cmd queue", error);
 }
 
 int
