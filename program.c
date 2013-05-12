@@ -154,7 +154,7 @@ work_out_next_config(__local unsigned short *best_config_per_proc)
 
 void
 mark_config_as_explored(unsigned int schedule_depth, unsigned short min_config,
-			__global unsigned char *scratch_buffer)
+			__global char *scratch_buffer)
 {
 	unsigned int scratchidx;
 
@@ -162,6 +162,20 @@ mark_config_as_explored(unsigned int schedule_depth, unsigned short min_config,
 				schedule_depth % NUM_MATCHES,
 				min_config);
 	scratch_buffer[scratchidx] |= CONFIG_EXPLORED;
+}
+
+unsigned int
+install_match(unsigned int schedule_depth, unsigned int min_config,
+		__local char *current_schedule, __global char *match_configs)
+{
+  unsigned int match_idx = min_config * 4; // 4 bytes per config
+  unsigned int schedule_loc = schedule_depth * 4; // 4 bytes per schedule match
+
+  current_schedule[match_idx] = match_configs[match_idx];
+  current_schedule[match_idx + 1] = match_configs[match_idx + 1];
+  current_schedule[match_idx + 2] = match_configs[match_idx + 2];
+  current_schedule[match_idx + 3] = match_configs[match_idx + 3];
+  return schedule_depth + 1;
 }
 
 __kernel void start_trampoline(__global char *match_configs,
@@ -205,6 +219,10 @@ __kernel void start_trampoline(__global char *match_configs,
 
 		mark_config_as_explored(schedule_depth, min_config,
 					scratch_buffer);
+
+		schedule_depth = install_match(schedule_depth, min_config,
+						current_schedule,
+						match_configs);
 
 		// Break out on account of not being implemented right now.
 		break;
