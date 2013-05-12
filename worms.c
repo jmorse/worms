@@ -156,7 +156,8 @@ prepare_job_scenario()
 
 	match_config_buf = clCreateBuffer(opencl_ctx,
 				CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS,
+				sizeof(uint8_t) * NUMSLOTS * configs_per_proc
+							* NUM_STREAM_PROCS,
 				match_configs, &error);
 	check_error("creating buffer", error);
 
