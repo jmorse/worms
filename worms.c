@@ -194,8 +194,8 @@ main(int argc, char **argv)
 	prepare_job_scenario();
 
 	/* Start this processing scenario. */
-	g_work_size = 760;
-	l_work_size = 760;
+	g_work_size = NUM_STREAM_PROCS;
+	l_work_size = NUM_STREAM_PROCS;
 	error = clEnqueueNDRangeKernel(cmd_queue, kernel, 1, NULL, &g_work_size,
 					&l_work_size, 0, NULL,
 					&kernel_completion);
