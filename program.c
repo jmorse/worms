@@ -8,6 +8,10 @@ void
 verify_spaced_constraint(__private char *current_schedule,
 			__private unsigned int schedule_depth)
 {
+	// If scheduling the first round, no spaced constraint.
+	if (schedule_depth < NUM_MATCHES)
+		return;
+
 	return;
 }
 
