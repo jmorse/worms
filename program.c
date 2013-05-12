@@ -141,6 +141,12 @@ __kernel void start_trampoline(__global char *match_configs,
 		// Lettuce sync
 		barrier(CLK_LOCAL_MEM_FENCE);
 
+		// Everyone check what the best config is.
+		__private int min_config = 0xFFFFFFFF;
+		for (i = 0; i < NUM_STREAM_PROCS; i++)
+			min_config = (min_config < best_config_per_proc[i])
+				? min_config : best_config_per_proc[i];
+
 		// Break out on account of not being implemented right now.
 		break;
 	}
