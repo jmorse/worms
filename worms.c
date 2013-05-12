@@ -22,7 +22,7 @@
 
 uint8_t *match_configs;
 cl_context opencl_ctx;
-cl_mem match_config_buf, output_buf;
+cl_mem match_config_buf, output_buf, scratch_buf;
 cl_device_id device_id;
 cl_kernel kernel;
 cl_command_queue cmd_queue;
@@ -174,9 +174,17 @@ prepare_job_scenario()
 				1024, NULL, &error);
 	check_error("creating output buffer", error);
 
+	scratch_buf = clCreateBuffer(opencl_ctx,
+				CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR,
+				NUMROUNDS * NUMMATCHES * NUMMATCHCONFIGS,
+				NULL, &error);
+	check_error("creating scratch buffer", error);
+
 	error = clSetKernelArg(kernel, 0, sizeof(cl_mem), &match_config_buf);
 	check_error("setting kernel arg 0", error);
 	error = clSetKernelArg(kernel, 1, sizeof(cl_mem), &output_buf);
+	check_error("setting kernel arg 1", error);
+	error = clSetKernelArg(kernel, 2, sizeof(cl_mem), &scratch_buf);
 	check_error("setting kernel arg 1", error);
 
 	cmd_queue = clCreateCommandQueue(opencl_ctx, device_id, 0, &error);

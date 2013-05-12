@@ -9,6 +9,14 @@
 #define roundbit(arr, round, idx) \
 			(1 << arr[(round * NUM_MATCHES * 4) + idx])
 
+#define scratch_idx(round, match, config) \
+			((round * NUM_MATCHES * NUM_MATCH_CONFIGS) + \
+			 (match * NUM_MATCH_CONFIGS) + \
+			 config)
+
+#define CONFIG_VALID 1
+#define CONFIG_EXPLORED 2
+
 int
 verify_spaced_constraint(__private char *current_schedule,
 			__private unsigned int schedule_depth)
@@ -79,7 +87,8 @@ verify_spaced_constraint(__private char *current_schedule,
 }
 
 __kernel void start_trampoline(__global char *match_configs,
-				__global char *output)
+				__global char *output,
+				__global char *scratch_buffer)
 {
 	__private unsigned int i, startloc, cur_config;
 	// Per worker match configs.
@@ -89,12 +98,6 @@ __kernel void start_trampoline(__global char *match_configs,
 		current_schedule[sizeof(char) * 4 * NUM_MATCHES * NUM_ROUNDS];
 	// Current depth into schedule.
 	__private unsigned int schedule_depth = 0;
-
-	// Current exploration scenario -- a record of, for how deep we are,
-	// whether or not the corresponding configuration is valid, and or
-	// explored.
-	__local char
-	cur_exploration_state[NUM_ROUNDS][NUM_MATCHES][NUM_MATCH_CONFIGS];
 
 	// Read in per worker match configs
 	startloc = get_local_id(0) * CONFIGS_PER_PROC * 4;
@@ -116,8 +119,14 @@ __kernel void start_trampoline(__global char *match_configs,
 			current_schedule[(schedule_depth * 4) + 3] =
 				local_match_configs[(cur_config * 4) + 3];
 
+			char valid =
 			verify_spaced_constraint(current_schedule,
 					schedule_depth);
+
+			scratch_buffer[scratch_idx(schedule_depth / NUM_MATCHES,
+						schedule_depth % NUM_MATCHES,
+						startloc + cur_config)] =
+				(valid) ? CONFIG_VALID : 0;
 		}
 
 		// Break out on account of not being implemented right now.
