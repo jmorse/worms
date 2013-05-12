@@ -17,6 +17,7 @@
 #define NUMMATCHES 8
 #define NUMROUNDS 6
 #define NUMMATCHCONFIGS 35960
+#define NUM_STREAM_PROCS 512
 
 uint8_t *match_configs;
 cl_context opencl_ctx;
@@ -25,6 +26,7 @@ cl_device_id device_id;
 cl_kernel kernel;
 cl_command_queue cmd_queue;
 cl_event kernel_completion;
+unsigned int configs_per_proc;
 
 void
 check_error(const char *msg, cl_uint error)
@@ -67,22 +69,38 @@ init_opencl()
 void
 load_round_configs(const char *filename)
 {
-	unsigned int matches[NUMTEAMS], i, j;
+	unsigned int matches[NUMSLOTS], i, j, k, sz;
 
-	match_configs = malloc(sizeof(uint8_t) * NUMTEAMS * NUMMATCHCONFIGS);
+	sz = sizeof(uint8_t) * NUMSLOTS * NUMMATCHCONFIGS;
+	match_configs = malloc(sz);
 
 	/* And read everything in from input file. */
 	FILE *f = fopen(filename, "r");
 	j = 0;
 	while (fscanf(f, "(%u, %u, %u, %u)\n", &matches[0], &matches[1],
 				&matches[2], &matches[3]) == 4) {
-		for (i = 0; i < NUMTEAMS; i++) {
-			match_configs[(j * NUMTEAMS) + i] = matches[i];
-		}
+		for (i = 0; i < NUMSLOTS; i++) {
+			match_configs[(j * NUMSLOTS) + i] = matches[i]; }
 		j++;
 	}
 
 	fprintf(stderr, "Read in %d match configs\n", j);
+
+	// Calculate how many configs each processor will have. Fill in the
+	// end with duplicates of the last entry, so that we don't have to
+	// have any conditionals in the opencl proc. If needs be, all the way
+	// up to a full processor being all duplicates.
+	configs_per_proc = j / (NUM_STREAM_PROCS - 1);
+	unsigned int fill = j % configs_per_proc;
+	unsigned int remainder = configs_per_proc - fill;
+	// Fill in the remainder.
+	match_configs = realloc(match_configs, sz + (remainder * NUMSLOTS));
+	for (k = 0; k < remainder; k++) {
+		// Duplicate
+		memcpy(&match_configs[(NUMMATCHCONFIGS + k) * NUMSLOTS],
+				&match_configs[(j - 1) * NUMSLOTS],
+				NUMSLOTS * sizeof(uint8_t));
+	}
 }
 
 void
