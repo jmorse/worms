@@ -133,9 +133,18 @@ __kernel void start_trampoline(__global char *match_configs,
 						schedule_depth % NUM_MATCHES,
 						startloc + cur_config)] =
 				(!invalid) ? CONFIG_VALID : 0;
-			first_working_config =
-				(!invalid && first_working_config == 0xFFFF)
-				? startloc + cur_config : first_working_config;
+		}
+
+		// Determine minimum good config from our run.
+		min_config = 0xFFFF;
+		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
+				cur_config++) {
+			min_config = (scratch_buffer[
+				scratch_idx(schedule_depth / NUM_MATCHES,
+						schedule_depth % NUM_MATCHES,
+						startloc + cur_config)] ==
+					CONFIG_VALID)
+				? (startloc + cur_config) : min_config;
 		}
 
 		best_config_per_proc[get_local_id(0)] = first_working_config;
