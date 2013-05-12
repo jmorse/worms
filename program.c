@@ -138,6 +138,9 @@ __kernel void start_trampoline(__global char *match_configs,
 
 		best_config_per_proc[get_local_id(0)] = first_working_config;
 
+		// Lettuce sync
+		barrier(CLK_LOCAL_MEM_FENCE);
+
 		// Break out on account of not being implemented right now.
 		break;
 	}
