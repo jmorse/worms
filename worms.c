@@ -215,7 +215,7 @@ main(int argc, char **argv)
 					&kernel_completion);
 	check_error("enquing kernel", error);
 
-	char output_data[1024];
+	unsigned int output_data[256];
 	error = clEnqueueReadBuffer(cmd_queue, output_buf, true, 0, 1024,
 					output_data, 1, &kernel_completion,
 					NULL);

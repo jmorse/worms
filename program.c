@@ -88,7 +88,7 @@ verify_spaced_constraint(__private char *current_schedule,
 }
 
 __kernel void start_trampoline(__global char *match_configs,
-				__global char *output,
+				__global unsigned int *output,
 				__global char *scratch_buffer)
 {
 	__private unsigned int i, startloc, cur_config;
@@ -100,7 +100,7 @@ __kernel void start_trampoline(__global char *match_configs,
 	// Current depth into schedule.
 	__private unsigned int schedule_depth = 0;
 
-	__local short best_config_per_proc[NUM_STREAM_PROCS];
+	__local unsigned short best_config_per_proc[NUM_STREAM_PROCS];
 
 	// Read in per worker match configs
 	startloc = get_local_id(0) * CONFIGS_PER_PROC * 4;
@@ -108,8 +108,10 @@ __kernel void start_trampoline(__global char *match_configs,
 		local_match_configs[i] = match_configs[startloc + i];
 
 	// Primary algorithm goes here...
+	__private unsigned int min_config;
 	while (1) {
-		short first_working_config = 0xFFFF;
+		unsigned short first_working_config = 0;//0xFFFF;
+		min_config = 0xFFFFFFFF;
 		// Enumerate through our set of configs to test
 		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
 				cur_config++) {
@@ -123,16 +125,16 @@ __kernel void start_trampoline(__global char *match_configs,
 			current_schedule[(schedule_depth * 4) + 3] =
 				local_match_configs[(cur_config * 4) + 3];
 
-			char valid =
+			char invalid =
 			verify_spaced_constraint(current_schedule,
 					schedule_depth);
 
 			scratch_buffer[scratch_idx(schedule_depth / NUM_MATCHES,
 						schedule_depth % NUM_MATCHES,
 						startloc + cur_config)] =
-				(valid) ? CONFIG_VALID : 0;
+				(!invalid) ? CONFIG_VALID : 0;
 			first_working_config =
-				(valid && first_working_config == 0xFFFF)
+				(!invalid && first_working_config == 0xFFFF)
 				? startloc + cur_config : first_working_config;
 		}
 
@@ -142,7 +144,6 @@ __kernel void start_trampoline(__global char *match_configs,
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 		// Everyone check what the best config is.
-		__private int min_config = 0xFFFFFFFF;
 		for (i = 0; i < NUM_STREAM_PROCS; i++)
 			min_config = (min_config < best_config_per_proc[i])
 				? min_config : best_config_per_proc[i];
@@ -152,7 +153,7 @@ __kernel void start_trampoline(__global char *match_configs,
 	}
 
 	for (i = 0; i < 256; i++) {
-		output[i] = CONFIGS_PER_PROC;
+		output[i] = min_config;
 	}
 	write_mem_fence(CLK_GLOBAL_MEM_FENCE);
 	return;
