@@ -87,6 +87,38 @@ verify_spaced_constraint(__private char *current_schedule,
 	return failure;
 }
 
+void
+calcumalate_schedule_validity(unsigned int schedule_depth,
+				unsigned int startloc,
+				__private char *local_match_configs,
+				__private char *current_schedule,
+				__global char *scratch_buffer)
+{
+	unsigned int cur_config;
+	// Enumerate through our set of configs to test
+	for (cur_config = 0; cur_config < CONFIGS_PER_PROC; cur_config++) {
+		// Copy this config into schedule.
+		current_schedule[(schedule_depth * 4) + 0] =
+			local_match_configs[(cur_config * 4) + 0];
+		current_schedule[(schedule_depth * 4) + 1] =
+			local_match_configs[(cur_config * 4) + 1];
+		current_schedule[(schedule_depth * 4) + 2] =
+			local_match_configs[(cur_config * 4) + 2];
+		current_schedule[(schedule_depth * 4) + 3] =
+			local_match_configs[(cur_config * 4) + 3];
+
+		char invalid = verify_spaced_constraint(current_schedule,
+							schedule_depth);
+
+		scratch_buffer[scratch_idx(schedule_depth / NUM_MATCHES,
+					schedule_depth % NUM_MATCHES,
+					startloc + cur_config)] =
+			(!invalid) ? CONFIG_VALID : 0;
+	}
+
+	return;
+}
+
 __kernel void start_trampoline(__global char *match_configs,
 				__global unsigned int *output,
 				__global char *scratch_buffer)
@@ -111,31 +143,12 @@ __kernel void start_trampoline(__global char *match_configs,
 	__private unsigned int min_config;
 	while (1) {
 		min_config = 0xFFFFFFFF;
-		// Enumerate through our set of configs to test
-		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
-				cur_config++) {
-			// Copy this config into schedule.
-			current_schedule[(schedule_depth * 4) + 0] =
-				local_match_configs[(cur_config * 4) + 0];
-			current_schedule[(schedule_depth * 4) + 1] =
-				local_match_configs[(cur_config * 4) + 1];
-			current_schedule[(schedule_depth * 4) + 2] =
-				local_match_configs[(cur_config * 4) + 2];
-			current_schedule[(schedule_depth * 4) + 3] =
-				local_match_configs[(cur_config * 4) + 3];
-
-			char invalid =
-			verify_spaced_constraint(current_schedule,
-					schedule_depth);
-
-			scratch_buffer[scratch_idx(schedule_depth / NUM_MATCHES,
-						schedule_depth % NUM_MATCHES,
-						startloc + cur_config)] =
-				(!invalid) ? CONFIG_VALID : 0;
-		}
-
 		// Determine minimum good config from our run.
 		min_config = 0xFFFF;
+		calcumalate_schedule_validity(schedule_depth, startloc,
+				local_match_configs, current_schedule,
+				scratch_buffer);
+
 		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
 				cur_config++) {
 			min_config = (scratch_buffer[
