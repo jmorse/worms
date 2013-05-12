@@ -152,6 +152,18 @@ work_out_next_config(__local unsigned short *best_config_per_proc)
 	return min_config;
 }
 
+void
+mark_config_as_explored(unsigned int schedule_depth, unsigned short min_config,
+			__global unsigned char *scratch_buffer)
+{
+	unsigned int scratchidx;
+
+	scratchidx = scratch_idx(schedule_depth / NUM_MATCHES,
+				schedule_depth % NUM_MATCHES,
+				min_config);
+	scratch_buffer[scratchidx] |= CONFIG_EXPLORED;
+}
+
 __kernel void start_trampoline(__global char *match_configs,
 				__global unsigned int *output,
 				__global char *scratch_buffer)
@@ -189,6 +201,9 @@ __kernel void start_trampoline(__global char *match_configs,
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 		min_config = work_out_next_config(best_config_per_proc);
+
+		mark_config_as_explored(schedule_depth, min_config,
+					scratch_buffer);
 
 		// Break out on account of not being implemented right now.
 		break;
