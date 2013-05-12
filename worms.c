@@ -120,8 +120,8 @@ prepare_job_scenario()
 		exit(EXIT_FAILURE);
 	}
 
-	char prog_buffer[s.st_size];
-	memset(prog_buffer, 0, s.st_size);
+	char prog_buffer[s.st_size + 1];
+	memset(prog_buffer, 0, s.st_size + 1);
 	FILE *f = fopen("program.c", "r");
 	if (fread(prog_buffer, s.st_size, 1, f) != 1) {
 		perror("Couldn't read from program.c");
