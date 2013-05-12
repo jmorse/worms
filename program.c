@@ -19,7 +19,7 @@
 #define CONFIG_EXPLORED 2
 
 int
-verify_spaced_constraint(__private char *current_schedule,
+verify_spaced_constraint(__local char *current_schedule,
 			__private unsigned int schedule_depth)
 {
 	__private unsigned int round_boundries = schedule_depth % NUM_MATCHES;
@@ -91,7 +91,7 @@ void
 calcumalate_schedule_validity(unsigned int schedule_depth,
 				unsigned int startloc,
 				__private char *local_match_configs,
-				__private char *current_schedule,
+				__local char *current_schedule,
 				__global char *scratch_buffer)
 {
 	unsigned int cur_config;
@@ -171,13 +171,14 @@ __kernel void start_trampoline(__global char *match_configs,
 	__private unsigned int i, startloc, cur_config;
 	// Per worker match configs.
 	__private char local_match_configs[CONFIGS_PER_PROC * sizeof(char) * 4];
-	// Current exploration schedule config
-	__private char
-		current_schedule[sizeof(char) * 4 * NUM_MATCHES * NUM_ROUNDS];
 	// Current depth into schedule.
 	__private unsigned int schedule_depth = 0;
 
+	// An array of what each proc's best config number is.
 	__local unsigned short best_config_per_proc[NUM_STREAM_PROCS];
+	// Current exploration schedule config
+	__local char
+		current_schedule[sizeof(char) * 4 * NUM_MATCHES * NUM_ROUNDS];
 
 	// Read in per worker match configs
 	startloc = get_local_id(0) * CONFIGS_PER_PROC * 4;
