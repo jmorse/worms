@@ -1,4 +1,5 @@
 /* Preprocessor defines added by opencl compiler
+ * #define NUM_MATCH_CONFIGS
  * #define CONFIGS_PER_PROC
  * #define NUM_MATCHES
  * #define NUM_ROUNDS

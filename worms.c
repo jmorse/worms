@@ -139,8 +139,9 @@ prepare_job_scenario()
 	char preproc_defines[100000];
 	sprintf(preproc_defines,
 		"-DCONFIGS_PER_PROC=%d -DNUM_MATCHES=%d -DNUM_ROUNDS=%d "
-		"-DSPACED_DISTANCE=%d",
-		configs_per_proc, NUMMATCHES, NUMROUNDS, SPACED_DISTANCE);
+		"-DSPACED_DISTANCE=%d -DNUM_MATCH_CONFIGS=%d",
+		configs_per_proc, NUMMATCHES, NUMROUNDS, SPACED_DISTANCE,
+		NUMMATCHCONFIGS);
 	error = clBuildProgram(prog, 1, &device_id, preproc_defines,
 				NULL, NULL);
 
