@@ -169,12 +169,12 @@ install_match(unsigned int schedule_depth, unsigned int min_config,
 		__local char *current_schedule, __global char *match_configs)
 {
   unsigned int match_idx = min_config * 4; // 4 bytes per config
-  unsigned int schedule_loc = schedule_depth * 4; // 4 bytes per schedule match
+  unsigned int schedule_idx = schedule_depth * 4; // 4 bytes per schedule match
 
-  current_schedule[match_idx] = match_configs[match_idx];
-  current_schedule[match_idx + 1] = match_configs[match_idx + 1];
-  current_schedule[match_idx + 2] = match_configs[match_idx + 2];
-  current_schedule[match_idx + 3] = match_configs[match_idx + 3];
+  current_schedule[schedule_idx] = match_configs[match_idx];
+  current_schedule[schedule_idx + 1] = match_configs[match_idx + 1];
+  current_schedule[schedule_idx + 2] = match_configs[match_idx + 2];
+  current_schedule[schedule_idx + 3] = match_configs[match_idx + 3];
   return schedule_depth + 1;
 }
 
