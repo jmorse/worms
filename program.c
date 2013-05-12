@@ -178,6 +178,17 @@ install_match(unsigned int schedule_depth, unsigned int min_config,
   return schedule_depth + 1;
 }
 
+unsigned int
+pop_match(unsigned int schedule_depth, __local char *current_schedule)
+{
+	unsigned int idx = schedule_depth * 4;
+	current_schedule[idx] = 0;
+	current_schedule[idx + 1] = 0;
+	current_schedule[idx + 2] = 0;
+	current_schedule[idx + 3] = 0;
+	return schedule_depth - 1;;
+}
+
 __kernel void start_trampoline(__global char *match_configs,
 				__global unsigned int *output,
 				__global char *scratch_buffer)
