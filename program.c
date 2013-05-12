@@ -119,6 +119,25 @@ calcumalate_schedule_validity(unsigned int schedule_depth,
 	return;
 }
 
+unsigned int
+find_a_valid_config(unsigned int schedule_depth, unsigned int startloc,
+			__global char *scratch_buffer)
+{
+	unsigned int cur_config, min_config, scratchidx;
+
+	min_config = 0xFFFFFFFF;
+	for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
+			cur_config++) {
+		scratchidx = scratch_idx(schedule_depth / NUM_MATCHES,
+					schedule_depth % NUM_MATCHES,
+					startloc + cur_config);
+		min_config = (scratch_buffer[scratchidx] == CONFIG_VALID)
+			? (startloc + cur_config) : min_config;
+	}
+
+	return min_config;
+}
+
 __kernel void start_trampoline(__global char *match_configs,
 				__global unsigned int *output,
 				__global char *scratch_buffer)
@@ -149,17 +168,8 @@ __kernel void start_trampoline(__global char *match_configs,
 				local_match_configs, current_schedule,
 				scratch_buffer);
 
-		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
-				cur_config++) {
-			min_config = (scratch_buffer[
-				scratch_idx(schedule_depth / NUM_MATCHES,
-						schedule_depth % NUM_MATCHES,
-						startloc + cur_config)] ==
-					CONFIG_VALID)
-				? (startloc + cur_config) : min_config;
-		}
-
-		best_config_per_proc[get_local_id(0)] = min_config;
+		best_config_per_proc[get_local_id(0)] =
+		find_a_valid_config(schedule_depth, startloc, scratch_buffer);
 
 		// Lettuce sync
 		barrier(CLK_LOCAL_MEM_FENCE);
