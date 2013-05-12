@@ -110,7 +110,6 @@ __kernel void start_trampoline(__global char *match_configs,
 	// Primary algorithm goes here...
 	__private unsigned int min_config;
 	while (1) {
-		unsigned short first_working_config = 0;//0xFFFF;
 		min_config = 0xFFFFFFFF;
 		// Enumerate through our set of configs to test
 		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
@@ -147,7 +146,7 @@ __kernel void start_trampoline(__global char *match_configs,
 				? (startloc + cur_config) : min_config;
 		}
 
-		best_config_per_proc[get_local_id(0)] = first_working_config;
+		best_config_per_proc[get_local_id(0)] = min_config;
 
 		// Lettuce sync
 		barrier(CLK_LOCAL_MEM_FENCE);
