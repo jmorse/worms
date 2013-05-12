@@ -100,6 +100,8 @@ __kernel void start_trampoline(__global char *match_configs,
 	// Current depth into schedule.
 	__private unsigned int schedule_depth = 0;
 
+	__local short best_config_per_proc[NUM_STREAM_PROCS];
+
 	// Read in per worker match configs
 	startloc = get_local_id(0) * CONFIGS_PER_PROC * 4;
 	for (i = 0; i < CONFIGS_PER_PROC * 4; i++)
@@ -107,6 +109,7 @@ __kernel void start_trampoline(__global char *match_configs,
 
 	// Primary algorithm goes here...
 	while (1) {
+		short first_working_config = 0xFFFF;
 		// Enumerate through our set of configs to test
 		for (cur_config = 0; cur_config < CONFIGS_PER_PROC;
 				cur_config++) {
@@ -128,7 +131,12 @@ __kernel void start_trampoline(__global char *match_configs,
 						schedule_depth % NUM_MATCHES,
 						startloc + cur_config)] =
 				(valid) ? CONFIG_VALID : 0;
+			first_working_config =
+				(valid && first_working_config == 0xFFFF)
+				? startloc + cur_config : first_working_config;
 		}
+
+		best_config_per_proc[get_local_id(0)] = first_working_config;
 
 		// Break out on account of not being implemented right now.
 		break;
