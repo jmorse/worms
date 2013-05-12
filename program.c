@@ -90,6 +90,12 @@ __kernel void start_trampoline(__global char *match_configs,
 	// Current depth into schedule.
 	__private unsigned int schedule_depth = 0;
 
+	// Current exploration scenario -- a record of, for how deep we are,
+	// whether or not the corresponding configuration is valid, and or
+	// explored.
+	__local char
+	cur_exploration_state[NUM_ROUNDS][NUM_MATCHES][NUM_MATCH_CONFIGS];
+
 	// Read in per worker match configs
 	startloc = get_local_id(0) * CONFIGS_PER_PROC * 4;
 	for (i = 0; i < CONFIGS_PER_PROC * 4; i++)
