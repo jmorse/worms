@@ -2,6 +2,7 @@
  * #define CONFIGS_PER_PROC
  * #define NUM_MATCHES
  * #define NUM_ROUNDS
+ * #define SPACED_DISTANCE
  */
 
 void

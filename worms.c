@@ -18,6 +18,7 @@
 #define NUMROUNDS 6
 #define NUMMATCHCONFIGS 35960
 #define NUM_STREAM_PROCS 512
+#define SPACED_DISTANCE 5
 
 uint8_t *match_configs;
 cl_context opencl_ctx;
@@ -137,8 +138,9 @@ prepare_job_scenario()
 
 	char preproc_defines[100000];
 	sprintf(preproc_defines,
-		"-DCONFIGS_PER_PROC=%d -DNUM_MATCHES=%d -DNUM_ROUNDS=%d",
-		configs_per_proc, NUMMATCHES, NUMROUNDS);
+		"-DCONFIGS_PER_PROC=%d -DNUM_MATCHES=%d -DNUM_ROUNDS=%d "
+		"-DSPACED_DISTANCE=%d",
+		configs_per_proc, NUMMATCHES, NUMROUNDS, SPACED_DISTANCE);
 	error = clBuildProgram(prog, 1, &device_id, preproc_defines,
 				NULL, NULL);
 
