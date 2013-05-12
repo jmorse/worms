@@ -136,7 +136,9 @@ prepare_job_scenario()
 	check_error("creating program", error);
 
 	char preproc_defines[100000];
-	sprintf(preproc_defines, "-DCONFIGS_PER_PROC=%d", configs_per_proc);
+	sprintf(preproc_defines,
+		"-DCONFIGS_PER_PROC=%d -DNUM_MATCHES=%d -DNUM_ROUNDS=%d",
+		configs_per_proc, NUMMATCHES, NUMROUNDS);
 	error = clBuildProgram(prog, 1, &device_id, preproc_defines,
 				NULL, NULL);
 

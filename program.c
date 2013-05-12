@@ -1,5 +1,7 @@
 /* Preprocessor defines added by opencl compiler
  * #define CONFIGS_PER_PROC
+ * #define NUM_MATCHES
+ * #define NUM_ROUNDS
  */
 
 __kernel void start_trampoline(__global char *match_configs,
