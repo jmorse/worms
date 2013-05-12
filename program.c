@@ -216,7 +216,7 @@ __kernel void start_trampoline(__global char *match_configs,
 
 	// Primary algorithm goes here...
 	__private unsigned int min_config;
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < 2; i++) {
 		min_config = 0xFFFFFFFF;
 		// Determine minimum good config from our run.
 		min_config = 0xFFFF;
@@ -240,9 +240,6 @@ __kernel void start_trampoline(__global char *match_configs,
 						match_configs);
 
 		output[i] = min_config;
-
-		// Break out on account of not being implemented right now.
-		break;
 	}
 
 	write_mem_fence(CLK_GLOBAL_MEM_FENCE);
