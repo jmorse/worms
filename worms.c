@@ -135,7 +135,10 @@ prepare_job_scenario()
 							NULL, &error);
 	check_error("creating program", error);
 
-	error = clBuildProgram(prog, 1, &device_id, "", NULL, NULL);
+	char preproc_defines[100000];
+	sprintf(preproc_defines, "-DCONFIGS_PER_PROC=%d", configs_per_proc);
+	error = clBuildProgram(prog, 1, &device_id, preproc_defines,
+				NULL, NULL);
 
 	if (error != CL_SUCCESS) {
 		char buffer[10000];
