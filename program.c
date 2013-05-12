@@ -5,15 +5,76 @@
  * #define SPACED_DISTANCE
  */
 
-void
+#define roundbit(arr, round, idx) \
+			(1 << arr[(round * NUM_MATCHES * 4) + idx])
+
+int
 verify_spaced_constraint(__private char *current_schedule,
 			__private unsigned int schedule_depth)
 {
-	// If scheduling the first round, no spaced constraint.
-	if (schedule_depth < NUM_MATCHES)
-		return;
+	__private unsigned int round_boundries = schedule_depth % NUM_MATCHES;
+	__private unsigned int cur_boundry, i, failure;
 
-	return;
+	failure = 0;
+	for (cur_boundry = 0; cur_boundry < round_boundries; cur_boundry++) {
+		long bitmask = 0;
+
+		// Accumulate a bitmask of all the round bits from the prefix
+		// of the earlier round
+		for (i = 0; i < (SPACED_DISTANCE - 1); i++) {
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+0);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+1);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+2);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+3);
+		}
+
+		for (; i < NUM_MATCHES + SPACED_DISTANCE; i++) {
+			// If this match matches one of the previous bits, then
+			// we have a failure
+			failure |= (bitmask &
+			roundbit(current_schedule, cur_boundry, (i*4)+0));
+
+			failure |= (bitmask &
+			roundbit(current_schedule, cur_boundry, (i*4)+1));
+
+			failure |= (bitmask &
+			roundbit(current_schedule, cur_boundry, (i*4)+2));
+
+			failure |= (bitmask &
+			roundbit(current_schedule, cur_boundry, (i*4)+3));
+
+			// Accumulate the bits in the current round.
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+0);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+1);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+2);
+			bitmask |=
+			roundbit(current_schedule, cur_boundry, (i*4)+3);
+
+			// xor out
+			bitmask ^=
+			roundbit(current_schedule, cur_boundry,
+					((i+1-SPACED_DISTANCE)*4)+0);
+			bitmask ^=
+			roundbit(current_schedule, cur_boundry,
+					((i+1-SPACED_DISTANCE)*4)+1);
+			bitmask ^=
+			roundbit(current_schedule, cur_boundry,
+					((i+1-SPACED_DISTANCE)*4)+2);
+			bitmask ^=
+			roundbit(current_schedule, cur_boundry,
+					((i+1-SPACED_DISTANCE)*4)+3);
+		}
+
+	}
+
+	return failure;
 }
 
 __kernel void start_trampoline(__global char *match_configs,
