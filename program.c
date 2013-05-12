@@ -4,6 +4,7 @@
  * #define NUM_MATCHES
  * #define NUM_ROUNDS
  * #define SPACED_DISTANCE
+ * #define NUM_STREAM_PROCS
  */
 
 #define roundbit(arr, round, idx) \
