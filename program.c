@@ -138,6 +138,20 @@ find_a_valid_config(unsigned int schedule_depth, unsigned int startloc,
 	return min_config;
 }
 
+unsigned int
+work_out_next_config(__local unsigned short *best_config_per_proc)
+{
+	unsigned int i;
+	unsigned short min_config = 0xFFFF;
+
+	// Everyone check what the best config is.
+	for (i = 0; i < NUM_STREAM_PROCS; i++)
+		min_config = (min_config < best_config_per_proc[i])
+			? min_config : best_config_per_proc[i];
+
+	return min_config;
+}
+
 __kernel void start_trampoline(__global char *match_configs,
 				__global unsigned int *output,
 				__global char *scratch_buffer)
@@ -174,10 +188,7 @@ __kernel void start_trampoline(__global char *match_configs,
 		// Lettuce sync
 		barrier(CLK_LOCAL_MEM_FENCE);
 
-		// Everyone check what the best config is.
-		for (i = 0; i < NUM_STREAM_PROCS; i++)
-			min_config = (min_config < best_config_per_proc[i])
-				? min_config : best_config_per_proc[i];
+		min_config = work_out_next_config(best_config_per_proc);
 
 		// Break out on account of not being implemented right now.
 		break;
